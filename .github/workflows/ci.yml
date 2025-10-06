@@ -19,6 +19,32 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: 17
+      
+      - name: Start PostgreSQL service
+        run: docker compose up -d db
+
+      - name: Set environment variables
+        run: |
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> $GITHUB_ENV
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> $GITHUB_ENV
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> $GITHUB_ENV
+
+      - name: Wait for database to be ready
+        run: |
+          echo "Waiting for PostgreSQL to be ready on port 5432..."
+          MAX_RETRIES=30
+          RETRY_COUNT=0
+          until PGPASSWORD=admin123 pg_isready -h localhost -U admin -d account-service-db; do
+            RETRY_COUNT=$((RETRY_COUNT+1))
+            if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+              echo "PostgreSQL did not become ready in time. Exiting."
+              docker compose logs db
+              exit 1
+            fi
+            echo "PostgreSQL is not ready yet. Waiting 2 seconds..."
+            sleep 2
+          done
+          echo "PostgreSQL is accepting connections!"
 
       - name: Check code style
         run: mvn checkstyle:check
@@ -28,3 +54,6 @@ jobs:
 
       - name: Run Unit Tests
         run: mvn test
+
+      - name: Stop services
+        run: docker compose down
