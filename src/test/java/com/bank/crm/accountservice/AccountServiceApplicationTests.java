@@ -1,4 +1,4 @@
-package com.bank.crm.account_service;
+package com.bank.crm.accountservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
