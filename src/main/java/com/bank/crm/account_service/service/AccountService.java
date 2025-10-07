@@ -2,6 +2,7 @@ package com.bank.crm.account_service.service;
 
 import com.bank.crm.account_service.dto.AccountResponse;
 import com.bank.crm.account_service.dto.CreateAccountRequest;
+import com.bank.crm.account_service.dto.UpdateAccountRequest;
 import com.bank.crm.account_service.exception.AccountNotFoundException;
 import com.bank.crm.account_service.model.Account;
 import com.bank.crm.account_service.repository.AccountRepository;
@@ -114,6 +115,45 @@ public class AccountService {
             logger.warn("Account not found with ID: {}", accountId);
             return Optional.empty();
         }
+    }
+
+    /**
+     * Update an existing account
+     */
+    public AccountResponse updateAccount(UUID accountId, UpdateAccountRequest request) {
+        logger.info("Updating account with ID: {}", accountId);
+
+        Optional<Account> optionalAccount = accountRepository.findById(accountId);
+        if (optionalAccount.isEmpty()) {
+            logger.warn("Account with ID {} not found for update", accountId);
+            throw new AccountNotFoundException("Account not found with ID: " + accountId);
+        }
+
+        Account account = optionalAccount.get();
+
+        // Update only the fields that are provided (not null)
+        if (request.getAccType() != null) {
+            account.setAccType(request.getAccType());
+        }
+        if (request.getAccStatus() != null) {
+            account.setAccStatus(request.getAccStatus());
+        }
+        if (request.getInitialDeposit() != null) {
+            account.setInitialDeposit(request.getInitialDeposit());
+        }
+        if (request.getCurrency() != null) {
+            account.setCurrency(request.getCurrency());
+        }
+        if (request.getBranchId() != null) {
+            account.setBranchId(request.getBranchId());
+        }
+
+        // Save the updated account
+        Account updatedAccount = accountRepository.save(account);
+
+        logger.info("Account with ID {} updated successfully", accountId);
+
+        return convertToResponse(updatedAccount);
     }
 
     /**
