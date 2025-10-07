@@ -2,6 +2,7 @@ package com.bank.crm.account_service.controller;
 
 import com.bank.crm.account_service.dto.AccountResponse;
 import com.bank.crm.account_service.dto.CreateAccountRequest;
+import com.bank.crm.account_service.exception.AccountNotFoundException;
 import com.bank.crm.account_service.service.AccountService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -30,11 +31,29 @@ public class AccountController {
      */
     @PostMapping
     public ResponseEntity<AccountResponse> createAccount(@Valid @RequestBody CreateAccountRequest request) {
-        logger.info("Received request to create account for client: {}", request.getClientId());
+        try {
+            logger.info("Received request to create account for client: {}", request.getClientId());
 
-        AccountResponse response = accountService.createAccount(request);
-        logger.info("Account created successfully with ID: {}", response.getId());
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+            // Validate request parameters
+            if (request.getClientId() == null) {
+                throw new IllegalArgumentException("Client ID cannot be null");
+            }
+
+            if (request.getInitialDeposit() != null && request.getInitialDeposit().doubleValue() < 0) {
+                throw new IllegalArgumentException("Initial deposit cannot be negative");
+            }
+
+            AccountResponse response = accountService.createAccount(request);
+            logger.info("Account created successfully with ID: {}", response.getId());
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid request parameters: {}", e.getMessage());
+            throw e; // Re-throw to be handled by GlobalExceptionHandler
+        } catch (Exception e) {
+            logger.error("Unexpected error creating account for client {}: {}", request.getClientId(), e.getMessage(), e);
+            throw new RuntimeException("Failed to create account", e);
+        }
     }
 
     /**
@@ -42,11 +61,24 @@ public class AccountController {
      */
     @DeleteMapping("/{accountId}")
     public ResponseEntity<Void> deleteAccount(@PathVariable UUID accountId) {
-        logger.info("Received request to delete account: {}", accountId);
+        try {
+            logger.info("Received request to delete account: {}", accountId);
 
-        accountService.deleteAccount(accountId);
-        logger.info("Account deleted successfully: {}", accountId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            if (accountId == null) {
+                throw new IllegalArgumentException("Account ID cannot be null");
+            }
+
+            accountService.deleteAccount(accountId);
+            logger.info("Account deleted successfully: {}", accountId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+        } catch (AccountNotFoundException e) {
+            logger.warn("Attempted to delete non-existent account: {}", accountId);
+            throw e; // Re-throw to be handled by GlobalExceptionHandler
+        } catch (Exception e) {
+            logger.error("Unexpected error deleting account {}: {}", accountId, e.getMessage(), e);
+            throw new RuntimeException("Failed to delete account", e);
+        }
     }
 
     /**
@@ -54,11 +86,24 @@ public class AccountController {
      */
     @GetMapping("/client/{clientId}")
     public ResponseEntity<List<AccountResponse>> getAccountsByClientId(@PathVariable UUID clientId) {
-        logger.info("Received request to get accounts for client: {}", clientId);
+        try {
+            logger.info("Received request to get accounts for client: {}", clientId);
 
-        List<AccountResponse> accounts = accountService.getAccountsByClientId(clientId);
-        logger.info("Retrieved {} accounts for client: {}", accounts.size(), clientId);
-        return new ResponseEntity<>(accounts, HttpStatus.OK);
+            if (clientId == null) {
+                throw new IllegalArgumentException("Client ID cannot be null");
+            }
+
+            List<AccountResponse> accounts = accountService.getAccountsByClientId(clientId);
+            logger.info("Retrieved {} accounts for client: {}", accounts.size(), clientId);
+            return new ResponseEntity<>(accounts, HttpStatus.OK);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid client ID: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.error("Unexpected error retrieving accounts for client {}: {}", clientId, e.getMessage(), e);
+            throw new RuntimeException("Failed to retrieve accounts for client", e);
+        }
     }
 
     /**
@@ -66,11 +111,17 @@ public class AccountController {
      */
     @GetMapping
     public ResponseEntity<List<AccountResponse>> getAllAccounts() {
-        logger.info("Received request to get all accounts");
+        try {
+            logger.info("Received request to get all accounts");
 
-        List<AccountResponse> accounts = accountService.getAllAccounts();
-        logger.info("Retrieved {} total accounts", accounts.size());
-        return new ResponseEntity<>(accounts, HttpStatus.OK);
+            List<AccountResponse> accounts = accountService.getAllAccounts();
+            logger.info("Retrieved {} total accounts", accounts.size());
+            return new ResponseEntity<>(accounts, HttpStatus.OK);
+
+        } catch (Exception e) {
+            logger.error("Unexpected error retrieving all accounts: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to retrieve accounts", e);
+        }
     }
 
     /**
@@ -78,15 +129,28 @@ public class AccountController {
      */
     @GetMapping("/{accountId}")
     public ResponseEntity<AccountResponse> getAccountById(@PathVariable UUID accountId) {
-        logger.info("Received request to get account: {}", accountId);
+        try {
+            logger.info("Received request to get account: {}", accountId);
 
-        Optional<AccountResponse> account = accountService.getAccountById(accountId);
-        if (account.isPresent()) {
-            logger.info("Account found: {}", accountId);
-            return new ResponseEntity<>(account.get(), HttpStatus.OK);
-        } else {
-            logger.warn("Account not found: {}", accountId);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            if (accountId == null) {
+                throw new IllegalArgumentException("Account ID cannot be null");
+            }
+
+            Optional<AccountResponse> account = accountService.getAccountById(accountId);
+            if (account.isPresent()) {
+                logger.info("Account found: {}", accountId);
+                return new ResponseEntity<>(account.get(), HttpStatus.OK);
+            } else {
+                logger.warn("Account not found: {}", accountId);
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid account ID: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.error("Unexpected error retrieving account {}: {}", accountId, e.getMessage(), e);
+            throw new RuntimeException("Failed to retrieve account", e);
         }
     }
 }
