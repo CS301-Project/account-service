@@ -2,6 +2,7 @@ package com.bank.crm.account_service.controller;
 
 import com.bank.crm.account_service.dto.AccountResponse;
 import com.bank.crm.account_service.dto.CreateAccountRequest;
+import com.bank.crm.account_service.dto.UpdateAccountRequest;
 import com.bank.crm.account_service.exception.AccountNotFoundException;
 import com.bank.crm.account_service.service.AccountService;
 import jakarta.validation.Valid;
@@ -151,6 +152,40 @@ public class AccountController {
         } catch (Exception e) {
             logger.error("Unexpected error retrieving account {}: {}", accountId, e.getMessage(), e);
             throw new RuntimeException("Failed to retrieve account", e);
+        }
+    }
+
+    /**
+     * Update Account - PUT /api/accounts/{accountId}
+     */
+    @PutMapping("/{accountId}")
+    public ResponseEntity<AccountResponse> updateAccount(@PathVariable UUID accountId,
+                                                        @Valid @RequestBody UpdateAccountRequest request) {
+        try {
+            logger.info("Received request to update account: {}", accountId);
+
+            if (accountId == null) {
+                throw new IllegalArgumentException("Account ID cannot be null");
+            }
+
+            // Validate request parameters
+            if (request.getInitialDeposit() != null && request.getInitialDeposit().doubleValue() < 0) {
+                throw new IllegalArgumentException("Initial deposit cannot be negative");
+            }
+
+            AccountResponse response = accountService.updateAccount(accountId, request);
+            logger.info("Account updated successfully: {}", accountId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (AccountNotFoundException e) {
+            logger.warn("Attempted to update non-existent account: {}", accountId);
+            throw e; // Re-throw to be handled by GlobalExceptionHandler
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid request parameters: {}", e.getMessage());
+            throw e; // Re-throw to be handled by GlobalExceptionHandler
+        } catch (Exception e) {
+            logger.error("Unexpected error updating account {}: {}", accountId, e.getMessage(), e);
+            throw new RuntimeException("Failed to update account", e);
         }
     }
 }
