@@ -117,4 +117,173 @@ class AccountServiceTest {
         assertFalse(response.isPresent());
         verify(accountRepository).findById(accountId);
     }
+
+    @Test
+    void updateAccount_shouldThrowIfNotExists() {
+        UUID accountId = UUID.randomUUID();
+        com.bank.crm.account_service.dto.UpdateAccountRequest request =
+            new com.bank.crm.account_service.dto.UpdateAccountRequest(
+                AccountType.CHECKING, AccountStatus.ACTIVE, BigDecimal.valueOf(2000.0), "EUR", 2
+            );
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+
+        assertThrows(AccountNotFoundException.class, () -> accountService.updateAccount(accountId, request));
+        verify(accountRepository).findById(accountId);
+        verify(accountRepository, never()).save(any(Account.class));
+    }
+
+    @Test
+    void updateAccount_shouldUpdateAllFields() {
+        UUID accountId = UUID.randomUUID();
+        Account existingAccount = new Account(
+            UUID.randomUUID(), AccountType.SAVINGS, AccountStatus.ACTIVE,
+            LocalDateTime.now(), BigDecimal.valueOf(1000.0), "USD", 1
+        );
+        existingAccount.setId(accountId);
+
+        com.bank.crm.account_service.dto.UpdateAccountRequest request =
+            new com.bank.crm.account_service.dto.UpdateAccountRequest(
+                AccountType.CHECKING, AccountStatus.INACTIVE, BigDecimal.valueOf(2000.0), "EUR", 2
+            );
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
+        when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
+
+        AccountResponse response = accountService.updateAccount(accountId, request);
+
+        assertNotNull(response);
+        assertEquals(AccountType.CHECKING, existingAccount.getAccType());
+        assertEquals(AccountStatus.INACTIVE, existingAccount.getAccStatus());
+        assertEquals(BigDecimal.valueOf(2000.0), existingAccount.getInitialDeposit());
+        assertEquals("EUR", existingAccount.getCurrency());
+        assertEquals(2, existingAccount.getBranchId());
+        verify(accountRepository).findById(accountId);
+        verify(accountRepository).save(existingAccount);
+    }
+
+    @Test
+    void updateAccount_shouldUpdateOnlyAccType() {
+        UUID accountId = UUID.randomUUID();
+        Account existingAccount = new Account(
+            UUID.randomUUID(), AccountType.SAVINGS, AccountStatus.ACTIVE,
+            LocalDateTime.now(), BigDecimal.valueOf(1000.0), "USD", 1
+        );
+        existingAccount.setId(accountId);
+
+        com.bank.crm.account_service.dto.UpdateAccountRequest request =
+            new com.bank.crm.account_service.dto.UpdateAccountRequest(
+                AccountType.CHECKING, null, null, null, null
+            );
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
+        when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
+
+        AccountResponse response = accountService.updateAccount(accountId, request);
+
+        assertNotNull(response);
+        assertEquals(AccountType.CHECKING, existingAccount.getAccType());
+        assertEquals(AccountStatus.ACTIVE, existingAccount.getAccStatus()); // unchanged
+        verify(accountRepository).save(existingAccount);
+    }
+
+    @Test
+    void updateAccount_shouldUpdateOnlyAccStatus() {
+        UUID accountId = UUID.randomUUID();
+        Account existingAccount = new Account(
+            UUID.randomUUID(), AccountType.SAVINGS, AccountStatus.ACTIVE,
+            LocalDateTime.now(), BigDecimal.valueOf(1000.0), "USD", 1
+        );
+        existingAccount.setId(accountId);
+
+        com.bank.crm.account_service.dto.UpdateAccountRequest request =
+            new com.bank.crm.account_service.dto.UpdateAccountRequest(
+                null, AccountStatus.INACTIVE, null, null, null
+            );
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
+        when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
+
+        AccountResponse response = accountService.updateAccount(accountId, request);
+
+        assertNotNull(response);
+        assertEquals(AccountStatus.INACTIVE, existingAccount.getAccStatus());
+        assertEquals(AccountType.SAVINGS, existingAccount.getAccType()); // unchanged
+        verify(accountRepository).save(existingAccount);
+    }
+
+    @Test
+    void updateAccount_shouldUpdateOnlyInitialDeposit() {
+        UUID accountId = UUID.randomUUID();
+        Account existingAccount = new Account(
+            UUID.randomUUID(), AccountType.SAVINGS, AccountStatus.ACTIVE,
+            LocalDateTime.now(), BigDecimal.valueOf(1000.0), "USD", 1
+        );
+        existingAccount.setId(accountId);
+
+        com.bank.crm.account_service.dto.UpdateAccountRequest request =
+            new com.bank.crm.account_service.dto.UpdateAccountRequest(
+                null, null, BigDecimal.valueOf(5000.0), null, null
+            );
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
+        when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
+
+        AccountResponse response = accountService.updateAccount(accountId, request);
+
+        assertNotNull(response);
+        assertEquals(BigDecimal.valueOf(5000.0), existingAccount.getInitialDeposit());
+        assertEquals("USD", existingAccount.getCurrency()); // unchanged
+        verify(accountRepository).save(existingAccount);
+    }
+
+    @Test
+    void updateAccount_shouldUpdateOnlyCurrency() {
+        UUID accountId = UUID.randomUUID();
+        Account existingAccount = new Account(
+            UUID.randomUUID(), AccountType.SAVINGS, AccountStatus.ACTIVE,
+            LocalDateTime.now(), BigDecimal.valueOf(1000.0), "USD", 1
+        );
+        existingAccount.setId(accountId);
+
+        com.bank.crm.account_service.dto.UpdateAccountRequest request =
+            new com.bank.crm.account_service.dto.UpdateAccountRequest(
+                null, null, null, "GBP", null
+            );
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
+        when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
+
+        AccountResponse response = accountService.updateAccount(accountId, request);
+
+        assertNotNull(response);
+        assertEquals("GBP", existingAccount.getCurrency());
+        assertEquals(1, existingAccount.getBranchId()); // unchanged
+        verify(accountRepository).save(existingAccount);
+    }
+
+    @Test
+    void updateAccount_shouldUpdateOnlyBranchId() {
+        UUID accountId = UUID.randomUUID();
+        Account existingAccount = new Account(
+            UUID.randomUUID(), AccountType.SAVINGS, AccountStatus.ACTIVE,
+            LocalDateTime.now(), BigDecimal.valueOf(1000.0), "USD", 1
+        );
+        existingAccount.setId(accountId);
+
+        com.bank.crm.account_service.dto.UpdateAccountRequest request =
+            new com.bank.crm.account_service.dto.UpdateAccountRequest(
+                null, null, null, null, 5
+            );
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
+        when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
+
+        AccountResponse response = accountService.updateAccount(accountId, request);
+
+        assertNotNull(response);
+        assertEquals(5, existingAccount.getBranchId());
+        assertEquals(AccountType.SAVINGS, existingAccount.getAccType()); // unchanged
+        verify(accountRepository).save(existingAccount);
+    }
 }

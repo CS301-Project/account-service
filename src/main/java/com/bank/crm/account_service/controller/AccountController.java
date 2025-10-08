@@ -35,15 +35,6 @@ public class AccountController {
         try {
             logger.info("Received request to create account for client: {}", request.getClientId());
 
-            // Validate request parameters
-            if (request.getClientId() == null) {
-                throw new IllegalArgumentException("Client ID cannot be null");
-            }
-
-            if (request.getInitialDeposit() != null && request.getInitialDeposit().doubleValue() < 0) {
-                throw new IllegalArgumentException("Initial deposit cannot be negative");
-            }
-
             AccountResponse response = accountService.createAccount(request);
             logger.info("Account created successfully with ID: {}", response.getId());
             return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -65,10 +56,6 @@ public class AccountController {
         try {
             logger.info("Received request to delete account: {}", accountId);
 
-            if (accountId == null) {
-                throw new IllegalArgumentException("Account ID cannot be null");
-            }
-
             accountService.deleteAccount(accountId);
             logger.info("Account deleted successfully: {}", accountId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -89,10 +76,6 @@ public class AccountController {
     public ResponseEntity<List<AccountResponse>> getAccountsByClientId(@PathVariable UUID clientId) {
         try {
             logger.info("Received request to get accounts for client: {}", clientId);
-
-            if (clientId == null) {
-                throw new IllegalArgumentException("Client ID cannot be null");
-            }
 
             List<AccountResponse> accounts = accountService.getAccountsByClientId(clientId);
             logger.info("Retrieved {} accounts for client: {}", accounts.size(), clientId);
@@ -133,10 +116,6 @@ public class AccountController {
         try {
             logger.info("Received request to get account: {}", accountId);
 
-            if (accountId == null) {
-                throw new IllegalArgumentException("Account ID cannot be null");
-            }
-
             Optional<AccountResponse> account = accountService.getAccountById(accountId);
             if (account.isPresent()) {
                 logger.info("Account found: {}", accountId);
@@ -163,15 +142,6 @@ public class AccountController {
                                                         @Valid @RequestBody UpdateAccountRequest request) {
         try {
             logger.info("Received request to update account: {}", accountId);
-
-            if (accountId == null) {
-                throw new IllegalArgumentException("Account ID cannot be null");
-            }
-
-            // Validate request parameters
-            if (request.getInitialDeposit() != null && request.getInitialDeposit().doubleValue() < 0) {
-                throw new IllegalArgumentException("Initial deposit cannot be negative");
-            }
 
             AccountResponse response = accountService.updateAccount(accountId, request);
             logger.info("Account updated successfully: {}", accountId);
