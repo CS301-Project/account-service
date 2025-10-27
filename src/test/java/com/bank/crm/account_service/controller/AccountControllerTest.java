@@ -86,7 +86,7 @@ public class AccountControllerTest {
 
     @Test
     void createAccount_Success() throws Exception {
-        when(accountService.createAccount(any(CreateAccountRequest.class)))
+        when(accountService.createAccount(any(CreateAccountRequest.class), anyString()))
                 .thenReturn(accountResponse);
 
         mockMvc.perform(post("/api/accounts")
@@ -102,7 +102,7 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.currency").value("USD"))
                 .andExpect(jsonPath("$.branchId").value(1));
 
-        verify(accountService, times(1)).createAccount(any(CreateAccountRequest.class));
+        verify(accountService, times(1)).createAccount(any(CreateAccountRequest.class), anyString());
     }
 
     @Test
@@ -122,7 +122,7 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(accountService, never()).createAccount(any(CreateAccountRequest.class));
+        verify(accountService, never()).createAccount(any(CreateAccountRequest.class), anyString());
     }
 
     @Test
@@ -142,7 +142,7 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(accountService, never()).createAccount(any(CreateAccountRequest.class));
+        verify(accountService, never()).createAccount(any(CreateAccountRequest.class), anyString());
     }
 
     @Test
@@ -162,30 +162,30 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(accountService, never()).createAccount(any(CreateAccountRequest.class));
+        verify(accountService, never()).createAccount(any(CreateAccountRequest.class), anyString());
     }
 
     @Test
     void deleteAccount_Success() throws Exception {
-        doNothing().when(accountService).deleteAccount(testAccountId);
+        doNothing().when(accountService).deleteAccount(testAccountId, anyString());
 
         mockMvc.perform(delete("/api/accounts/{accountId}", testAccountId)
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 
-        verify(accountService, times(1)).deleteAccount(testAccountId);
+        verify(accountService, times(1)).deleteAccount(testAccountId, anyString());
     }
 
     @Test
     void deleteAccount_NotFound() throws Exception {
         doThrow(new AccountNotFoundException("Account not found with ID: " + testAccountId))
-                .when(accountService).deleteAccount(testAccountId);
+                .when(accountService).deleteAccount(testAccountId, anyString());
 
         mockMvc.perform(delete("/api/accounts/{accountId}", testAccountId)
                         .with(csrf()))
                 .andExpect(status().isNotFound());
 
-        verify(accountService, times(1)).deleteAccount(testAccountId);
+        verify(accountService, times(1)).deleteAccount(testAccountId, anyString());
     }
 
     @Test
@@ -241,7 +241,7 @@ public class AccountControllerTest {
 
     @Test
     void getAccountById_Success() throws Exception {
-        when(accountService.getAccountById(testAccountId)).thenReturn(Optional.of(accountResponse));
+        when(accountService.getAccountById(testAccountId, anyString())).thenReturn(Optional.of(accountResponse));
 
         mockMvc.perform(get("/api/accounts/{accountId}", testAccountId))
                 .andExpect(status().isOk())
@@ -250,17 +250,17 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.accType").value("SAVINGS"))
                 .andExpect(jsonPath("$.accStatus").value("ACTIVE"));
 
-        verify(accountService, times(1)).getAccountById(testAccountId);
+        verify(accountService, times(1)).getAccountById(testAccountId, anyString());
     }
 
     @Test
     void getAccountById_NotFound() throws Exception {
-        when(accountService.getAccountById(testAccountId)).thenReturn(Optional.empty());
+        when(accountService.getAccountById(testAccountId, anyString())).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/accounts/{accountId}", testAccountId))
                 .andExpect(status().isNotFound());
 
-        verify(accountService, times(1)).getAccountById(testAccountId);
+        verify(accountService, times(1)).getAccountById(testAccountId, anyString());
     }
 
     @Test
@@ -276,7 +276,7 @@ public class AccountControllerTest {
                 2
         );
 
-        when(accountService.updateAccount(eq(testAccountId), any(UpdateAccountRequest.class)))
+        when(accountService.updateAccount(eq(testAccountId), any(UpdateAccountRequest.class), anyString()))
                 .thenReturn(updatedResponse);
 
         mockMvc.perform(put("/api/accounts/{accountId}", testAccountId)
@@ -289,12 +289,12 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.initialDeposit").value(2000.00))
                 .andExpect(jsonPath("$.branchId").value(2));
 
-        verify(accountService, times(1)).updateAccount(eq(testAccountId), any(UpdateAccountRequest.class));
+        verify(accountService, times(1)).updateAccount(eq(testAccountId), any(UpdateAccountRequest.class), anyString());
     }
 
     @Test
     void updateAccount_NotFound() throws Exception {
-        when(accountService.updateAccount(eq(testAccountId), any(UpdateAccountRequest.class)))
+        when(accountService.updateAccount(eq(testAccountId), any(UpdateAccountRequest.class), anyString()))
                 .thenThrow(new AccountNotFoundException("Account not found with ID: " + testAccountId));
 
         mockMvc.perform(put("/api/accounts/{accountId}", testAccountId)
@@ -303,7 +303,7 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isNotFound());
 
-        verify(accountService, times(1)).updateAccount(eq(testAccountId), any(UpdateAccountRequest.class));
+        verify(accountService, times(1)).updateAccount(eq(testAccountId), any(UpdateAccountRequest.class), anyString());
     }
 
     @Test
@@ -322,12 +322,12 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(accountService, never()).updateAccount(eq(testAccountId), any(UpdateAccountRequest.class));
+        verify(accountService, never()).updateAccount(eq(testAccountId), any(UpdateAccountRequest.class), anyString());
     }
 
     @Test
     void createAccount_ThrowsIllegalArgumentException() throws Exception {
-        when(accountService.createAccount(any(CreateAccountRequest.class)))
+        when(accountService.createAccount(any(CreateAccountRequest.class), anyString()))
                 .thenThrow(new IllegalArgumentException("Invalid parameter"));
 
         mockMvc.perform(post("/api/accounts")
@@ -336,12 +336,12 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(accountService, times(1)).createAccount(any(CreateAccountRequest.class));
+        verify(accountService, times(1)).createAccount(any(CreateAccountRequest.class), anyString());
     }
 
     @Test
     void createAccount_ThrowsRuntimeException() throws Exception {
-        when(accountService.createAccount(any(CreateAccountRequest.class)))
+        when(accountService.createAccount(any(CreateAccountRequest.class), anyString()))
                 .thenThrow(new RuntimeException("Database error"));
 
         mockMvc.perform(post("/api/accounts")
@@ -350,19 +350,19 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isInternalServerError());
 
-        verify(accountService, times(1)).createAccount(any(CreateAccountRequest.class));
+        verify(accountService, times(1)).createAccount(any(CreateAccountRequest.class), anyString());
     }
 
     @Test
     void deleteAccount_ThrowsRuntimeException() throws Exception {
         doThrow(new RuntimeException("Database error"))
-                .when(accountService).deleteAccount(testAccountId);
+                .when(accountService).deleteAccount(testAccountId, anyString());
 
         mockMvc.perform(delete("/api/accounts/{accountId}", testAccountId)
                         .with(csrf()))
                 .andExpect(status().isInternalServerError());
 
-        verify(accountService, times(1)).deleteAccount(testAccountId);
+        verify(accountService, times(1)).deleteAccount(testAccountId, anyString());
     }
 
     @Test
@@ -400,29 +400,29 @@ public class AccountControllerTest {
 
     @Test
     void getAccountById_ThrowsIllegalArgumentException() throws Exception {
-        when(accountService.getAccountById(testAccountId))
+        when(accountService.getAccountById(testAccountId, anyString()))
                 .thenThrow(new IllegalArgumentException("Invalid account ID"));
 
         mockMvc.perform(get("/api/accounts/{accountId}", testAccountId))
                 .andExpect(status().isBadRequest());
 
-        verify(accountService, times(1)).getAccountById(testAccountId);
+        verify(accountService, times(1)).getAccountById(testAccountId, anyString());
     }
 
     @Test
     void getAccountById_ThrowsRuntimeException() throws Exception {
-        when(accountService.getAccountById(testAccountId))
+        when(accountService.getAccountById(testAccountId, anyString()))
                 .thenThrow(new RuntimeException("Database error"));
 
         mockMvc.perform(get("/api/accounts/{accountId}", testAccountId))
                 .andExpect(status().isInternalServerError());
 
-        verify(accountService, times(1)).getAccountById(testAccountId);
+        verify(accountService, times(1)).getAccountById(testAccountId, anyString());
     }
 
     @Test
     void updateAccount_ThrowsIllegalArgumentException() throws Exception {
-        when(accountService.updateAccount(eq(testAccountId), any(UpdateAccountRequest.class)))
+        when(accountService.updateAccount(eq(testAccountId), any(UpdateAccountRequest.class), anyString()))
                 .thenThrow(new IllegalArgumentException("Invalid parameter"));
 
         mockMvc.perform(put("/api/accounts/{accountId}", testAccountId)
@@ -431,12 +431,12 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(accountService, times(1)).updateAccount(eq(testAccountId), any(UpdateAccountRequest.class));
+        verify(accountService, times(1)).updateAccount(eq(testAccountId), any(UpdateAccountRequest.class), anyString());
     }
 
     @Test
     void updateAccount_ThrowsRuntimeException() throws Exception {
-        when(accountService.updateAccount(eq(testAccountId), any(UpdateAccountRequest.class)))
+        when(accountService.updateAccount(eq(testAccountId), any(UpdateAccountRequest.class), anyString()))
                 .thenThrow(new RuntimeException("Database error"));
 
         mockMvc.perform(put("/api/accounts/{accountId}", testAccountId)
@@ -445,6 +445,6 @@ public class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isInternalServerError());
 
-        verify(accountService, times(1)).updateAccount(eq(testAccountId), any(UpdateAccountRequest.class));
+        verify(accountService, times(1)).updateAccount(eq(testAccountId), any(UpdateAccountRequest.class), anyString());
     }
 }

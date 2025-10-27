@@ -41,7 +41,7 @@ class AccountServiceTest {
 
         when(accountRepository.save(any(Account.class))).thenReturn(savedAccount);
 
-        AccountResponse response = accountService.createAccount(request);
+        AccountResponse response = accountService.createAccount(request, anyString());
 
         assertNotNull(response);
         assertEquals(savedAccount.getId(), response.getId());
@@ -53,7 +53,7 @@ class AccountServiceTest {
         UUID accountId = UUID.randomUUID();
         when(accountRepository.existsById(accountId)).thenReturn(true);
 
-        accountService.deleteAccount(accountId);
+        accountService.deleteAccount(accountId, anyString());
 
         verify(accountRepository).deleteById(accountId);
     }
@@ -63,7 +63,7 @@ class AccountServiceTest {
         UUID accountId = UUID.randomUUID();
         when(accountRepository.existsById(accountId)).thenReturn(false);
 
-        assertThrows(AccountNotFoundException.class, () -> accountService.deleteAccount(accountId));
+        assertThrows(AccountNotFoundException.class, () -> accountService.deleteAccount(accountId, anyString()));
     }
 
     @Test
@@ -100,7 +100,7 @@ class AccountServiceTest {
         account.setId(accountId);
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
 
-        Optional<AccountResponse> response = accountService.getAccountById(accountId);
+        Optional<AccountResponse> response = accountService.getAccountById(accountId, anyString());
 
         assertTrue(response.isPresent());
         assertEquals(accountId, response.get().getId());
@@ -112,7 +112,7 @@ class AccountServiceTest {
         UUID accountId = UUID.randomUUID();
         when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
 
-        Optional<AccountResponse> response = accountService.getAccountById(accountId);
+        Optional<AccountResponse> response = accountService.getAccountById(accountId, anyString());
 
         assertFalse(response.isPresent());
         verify(accountRepository).findById(accountId);
@@ -128,7 +128,7 @@ class AccountServiceTest {
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
 
-        assertThrows(AccountNotFoundException.class, () -> accountService.updateAccount(accountId, request));
+        assertThrows(AccountNotFoundException.class, () -> accountService.updateAccount(accountId, request, anyString()));
         verify(accountRepository).findById(accountId);
         verify(accountRepository, never()).save(any(Account.class));
     }
@@ -150,7 +150,7 @@ class AccountServiceTest {
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
 
-        AccountResponse response = accountService.updateAccount(accountId, request);
+        AccountResponse response = accountService.updateAccount(accountId, request, anyString());
 
         assertNotNull(response);
         assertEquals(AccountType.CHECKING, existingAccount.getAccType());
@@ -179,7 +179,7 @@ class AccountServiceTest {
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
 
-        AccountResponse response = accountService.updateAccount(accountId, request);
+        AccountResponse response = accountService.updateAccount(accountId, request, anyString());
 
         assertNotNull(response);
         assertEquals(AccountType.CHECKING, existingAccount.getAccType());
@@ -204,7 +204,7 @@ class AccountServiceTest {
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
 
-        AccountResponse response = accountService.updateAccount(accountId, request);
+        AccountResponse response = accountService.updateAccount(accountId, request, anyString());
 
         assertNotNull(response);
         assertEquals(AccountStatus.INACTIVE, existingAccount.getAccStatus());
@@ -229,7 +229,7 @@ class AccountServiceTest {
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
 
-        AccountResponse response = accountService.updateAccount(accountId, request);
+        AccountResponse response = accountService.updateAccount(accountId, request, anyString());
 
         assertNotNull(response);
         assertEquals(BigDecimal.valueOf(5000.0), existingAccount.getInitialDeposit());
@@ -254,7 +254,7 @@ class AccountServiceTest {
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
 
-        AccountResponse response = accountService.updateAccount(accountId, request);
+        AccountResponse response = accountService.updateAccount(accountId, request, anyString());
 
         assertNotNull(response);
         assertEquals("GBP", existingAccount.getCurrency());
@@ -279,7 +279,7 @@ class AccountServiceTest {
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
 
-        AccountResponse response = accountService.updateAccount(accountId, request);
+        AccountResponse response = accountService.updateAccount(accountId, request, anyString());
 
         assertNotNull(response);
         assertEquals(5, existingAccount.getBranchId());
