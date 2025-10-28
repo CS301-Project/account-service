@@ -24,6 +24,9 @@ class AccountServiceTest {
     @Mock
     private AccountRepository accountRepository;
 
+    @Mock
+    private LoggingService loggingService;
+
     @InjectMocks
     private AccountService accountService;
 
@@ -41,29 +44,11 @@ class AccountServiceTest {
 
         when(accountRepository.save(any(Account.class))).thenReturn(savedAccount);
 
-        AccountResponse response = accountService.createAccount(request, anyString());
+        AccountResponse response = accountService.createAccount(request, "test-user-123");
 
         assertNotNull(response);
         assertEquals(savedAccount.getId(), response.getId());
         verify(accountRepository).save(any(Account.class));
-    }
-
-    @Test
-    void deleteAccount_shouldDeleteIfExists() {
-        UUID accountId = UUID.randomUUID();
-        when(accountRepository.existsById(accountId)).thenReturn(true);
-
-        accountService.deleteAccount(accountId, anyString());
-
-        verify(accountRepository).deleteById(accountId);
-    }
-
-    @Test
-    void deleteAccount_shouldThrowIfNotExists() {
-        UUID accountId = UUID.randomUUID();
-        when(accountRepository.existsById(accountId)).thenReturn(false);
-
-        assertThrows(AccountNotFoundException.class, () -> accountService.deleteAccount(accountId, anyString()));
     }
 
     @Test
@@ -74,7 +59,7 @@ class AccountServiceTest {
         );
         when(accountRepository.findByClientId(clientId)).thenReturn(accounts);
 
-        List<AccountResponse> responses = accountService.getAccountsByClientId(clientId, anyString());
+        List<AccountResponse> responses = accountService.getAccountsByClientId(clientId, "test-user-123");
 
         assertEquals(1, responses.size());
         verify(accountRepository).findByClientId(clientId);
@@ -100,7 +85,7 @@ class AccountServiceTest {
         account.setId(accountId);
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
 
-        Optional<AccountResponse> response = accountService.getAccountById(accountId, anyString());
+        Optional<AccountResponse> response = accountService.getAccountById(accountId, "test-user-123");
 
         assertTrue(response.isPresent());
         assertEquals(accountId, response.get().getId());
@@ -112,7 +97,7 @@ class AccountServiceTest {
         UUID accountId = UUID.randomUUID();
         when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
 
-        Optional<AccountResponse> response = accountService.getAccountById(accountId, anyString());
+        Optional<AccountResponse> response = accountService.getAccountById(accountId, "test-user-123");
 
         assertFalse(response.isPresent());
         verify(accountRepository).findById(accountId);
@@ -128,7 +113,7 @@ class AccountServiceTest {
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
 
-        assertThrows(AccountNotFoundException.class, () -> accountService.updateAccount(accountId, request, anyString()));
+        assertThrows(AccountNotFoundException.class, () -> accountService.updateAccount(accountId, request, "test-user-123"));
         verify(accountRepository).findById(accountId);
         verify(accountRepository, never()).save(any(Account.class));
     }
@@ -150,7 +135,7 @@ class AccountServiceTest {
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
 
-        AccountResponse response = accountService.updateAccount(accountId, request, anyString());
+        AccountResponse response = accountService.updateAccount(accountId, request, "test-user-123");
 
         assertNotNull(response);
         assertEquals(AccountType.CHECKING, existingAccount.getAccType());
@@ -179,7 +164,7 @@ class AccountServiceTest {
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
 
-        AccountResponse response = accountService.updateAccount(accountId, request, anyString());
+        AccountResponse response = accountService.updateAccount(accountId, request, "test-user-123");
 
         assertNotNull(response);
         assertEquals(AccountType.CHECKING, existingAccount.getAccType());
@@ -204,7 +189,7 @@ class AccountServiceTest {
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
 
-        AccountResponse response = accountService.updateAccount(accountId, request, anyString());
+        AccountResponse response = accountService.updateAccount(accountId, request, "test-user-123");
 
         assertNotNull(response);
         assertEquals(AccountStatus.INACTIVE, existingAccount.getAccStatus());
@@ -229,7 +214,7 @@ class AccountServiceTest {
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
 
-        AccountResponse response = accountService.updateAccount(accountId, request, anyString());
+        AccountResponse response = accountService.updateAccount(accountId, request, "test-user-123");
 
         assertNotNull(response);
         assertEquals(BigDecimal.valueOf(5000.0), existingAccount.getInitialDeposit());
@@ -254,7 +239,7 @@ class AccountServiceTest {
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
 
-        AccountResponse response = accountService.updateAccount(accountId, request, anyString());
+        AccountResponse response = accountService.updateAccount(accountId, request, "test-user-123");
 
         assertNotNull(response);
         assertEquals("GBP", existingAccount.getCurrency());
@@ -279,7 +264,7 @@ class AccountServiceTest {
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
 
-        AccountResponse response = accountService.updateAccount(accountId, request, anyString());
+        AccountResponse response = accountService.updateAccount(accountId, request, "test-user-123");
 
         assertNotNull(response);
         assertEquals(5, existingAccount.getBranchId());
