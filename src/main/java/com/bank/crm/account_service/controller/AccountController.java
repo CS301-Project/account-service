@@ -31,11 +31,13 @@ public class AccountController {
      * Create Account - POST /api/accounts
      */
     @PostMapping
-    public ResponseEntity<AccountResponse> createAccount(@Valid @RequestBody CreateAccountRequest request) {
+    public ResponseEntity<AccountResponse> createAccount(
+            @Valid @RequestBody CreateAccountRequest request,
+            @RequestParam String userId) {
         try {
-            logger.info("Received request to create account for client: {}", request.getClientId());
+            logger.info("Received request to create account for client: {} by user: {}", request.getClientId(), userId);
 
-            AccountResponse response = accountService.createAccount(request);
+            AccountResponse response = accountService.createAccount(request, userId);
             logger.info("Account created successfully with ID: {}", response.getId());
             return new ResponseEntity<>(response, HttpStatus.CREATED);
 
@@ -52,11 +54,13 @@ public class AccountController {
      * Delete Account - DELETE /api/accounts/{accountId}
      */
     @DeleteMapping("/{accountId}")
-    public ResponseEntity<Void> deleteAccount(@PathVariable UUID accountId) {
+    public ResponseEntity<Void> deleteAccount(
+            @PathVariable UUID accountId,
+            @RequestParam String userId) {
         try {
-            logger.info("Received request to delete account: {}", accountId);
+            logger.info("Received request to delete account: {} by user: {}", accountId, userId);
 
-            accountService.deleteAccount(accountId);
+            accountService.deleteAccount(accountId, userId);
             logger.info("Account deleted successfully: {}", accountId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
@@ -73,11 +77,11 @@ public class AccountController {
      * Get Account by Client ID - GET /api/accounts/client/{clientId}
      */
     @GetMapping("/client/{clientId}")
-    public ResponseEntity<List<AccountResponse>> getAccountsByClientId(@PathVariable UUID clientId) {
+    public ResponseEntity<List<AccountResponse>> getAccountsByClientId(@PathVariable UUID clientId, @RequestParam String userId) {
         try {
             logger.info("Received request to get accounts for client: {}", clientId);
 
-            List<AccountResponse> accounts = accountService.getAccountsByClientId(clientId);
+            List<AccountResponse> accounts = accountService.getAccountsByClientId(clientId, userId);
             logger.info("Retrieved {} accounts for client: {}", accounts.size(), clientId);
             return new ResponseEntity<>(accounts, HttpStatus.OK);
 
@@ -112,11 +116,13 @@ public class AccountController {
      * Get Account by ID - GET /api/accounts/{accountId}
      */
     @GetMapping("/{accountId}")
-    public ResponseEntity<AccountResponse> getAccountById(@PathVariable UUID accountId) {
+    public ResponseEntity<AccountResponse> getAccountById(
+            @PathVariable UUID accountId,
+            @RequestParam String userId) {
         try {
-            logger.info("Received request to get account: {}", accountId);
+            logger.info("Received request to get account: {} by user: {}", accountId, userId);
 
-            Optional<AccountResponse> account = accountService.getAccountById(accountId);
+            Optional<AccountResponse> account = accountService.getAccountById(accountId, userId);
             if (account.isPresent()) {
                 logger.info("Account found: {}", accountId);
                 return new ResponseEntity<>(account.get(), HttpStatus.OK);
@@ -138,12 +144,14 @@ public class AccountController {
      * Update Account - PUT /api/accounts/{accountId}
      */
     @PutMapping("/{accountId}")
-    public ResponseEntity<AccountResponse> updateAccount(@PathVariable UUID accountId,
-                                                        @Valid @RequestBody UpdateAccountRequest request) {
+    public ResponseEntity<AccountResponse> updateAccount(
+            @PathVariable UUID accountId,
+            @Valid @RequestBody UpdateAccountRequest request,
+            @RequestParam String userId) {
         try {
-            logger.info("Received request to update account: {}", accountId);
+            logger.info("Received request to update account: {} by user: {}", accountId, userId);
 
-            AccountResponse response = accountService.updateAccount(accountId, request);
+            AccountResponse response = accountService.updateAccount(accountId, request, userId);
             logger.info("Account updated successfully: {}", accountId);
             return new ResponseEntity<>(response, HttpStatus.OK);
 
