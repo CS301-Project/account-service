@@ -77,11 +77,11 @@ public class AccountController {
      * Get Account by Client ID - GET /api/accounts/client/{clientId}
      */
     @GetMapping("/client/{clientId}")
-    public ResponseEntity<List<AccountResponse>> getAccountsByClientId(@PathVariable UUID clientId) {
+    public ResponseEntity<List<AccountResponse>> getAccountsByClientId(@PathVariable UUID clientId, @RequestParam String userId) {
         try {
             logger.info("Received request to get accounts for client: {}", clientId);
 
-            List<AccountResponse> accounts = accountService.getAccountsByClientId(clientId);
+            List<AccountResponse> accounts = accountService.getAccountsByClientId(clientId, userId);
             logger.info("Retrieved {} accounts for client: {}", accounts.size(), clientId);
             return new ResponseEntity<>(accounts, HttpStatus.OK);
 

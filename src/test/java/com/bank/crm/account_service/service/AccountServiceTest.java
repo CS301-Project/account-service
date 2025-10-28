@@ -74,7 +74,7 @@ class AccountServiceTest {
         );
         when(accountRepository.findByClientId(clientId)).thenReturn(accounts);
 
-        List<AccountResponse> responses = accountService.getAccountsByClientId(clientId);
+        List<AccountResponse> responses = accountService.getAccountsByClientId(clientId, anyString());
 
         assertEquals(1, responses.size());
         verify(accountRepository).findByClientId(clientId);

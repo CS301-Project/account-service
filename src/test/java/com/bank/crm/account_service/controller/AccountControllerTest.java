@@ -191,7 +191,7 @@ public class AccountControllerTest {
     @Test
     void getAccountsByClientId_Success() throws Exception {
         List<AccountResponse> accounts = Arrays.asList(accountResponse);
-        when(accountService.getAccountsByClientId(testClientId)).thenReturn(accounts);
+        when(accountService.getAccountsByClientId(testClientId, anyString())).thenReturn(accounts);
 
         mockMvc.perform(get("/api/accounts/client/{clientId}", testClientId))
                 .andExpect(status().isOk())
@@ -199,19 +199,19 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$[0].id").value(testAccountId.toString()))
                 .andExpect(jsonPath("$[0].clientId").value(testClientId.toString()));
 
-        verify(accountService, times(1)).getAccountsByClientId(testClientId);
+        verify(accountService, times(1)).getAccountsByClientId(testClientId, anyString());
     }
 
     @Test
     void getAccountsByClientId_EmptyList() throws Exception {
-        when(accountService.getAccountsByClientId(testClientId)).thenReturn(Arrays.asList());
+        when(accountService.getAccountsByClientId(testClientId, anyString())).thenReturn(Arrays.asList());
 
         mockMvc.perform(get("/api/accounts/client/{clientId}", testClientId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
 
-        verify(accountService, times(1)).getAccountsByClientId(testClientId);
+        verify(accountService, times(1)).getAccountsByClientId(testClientId, anyString());
     }
 
     @Test
@@ -367,24 +367,24 @@ public class AccountControllerTest {
 
     @Test
     void getAccountsByClientId_ThrowsIllegalArgumentException() throws Exception {
-        when(accountService.getAccountsByClientId(testClientId))
+        when(accountService.getAccountsByClientId(testClientId, anyString()))
                 .thenThrow(new IllegalArgumentException("Invalid client ID"));
 
         mockMvc.perform(get("/api/accounts/client/{clientId}", testClientId))
                 .andExpect(status().isBadRequest());
 
-        verify(accountService, times(1)).getAccountsByClientId(testClientId);
+        verify(accountService, times(1)).getAccountsByClientId(testClientId, anyString());
     }
 
     @Test
     void getAccountsByClientId_ThrowsRuntimeException() throws Exception {
-        when(accountService.getAccountsByClientId(testClientId))
+        when(accountService.getAccountsByClientId(testClientId, anyString()))
                 .thenThrow(new RuntimeException("Database error"));
 
         mockMvc.perform(get("/api/accounts/client/{clientId}", testClientId))
                 .andExpect(status().isInternalServerError());
 
-        verify(accountService, times(1)).getAccountsByClientId(testClientId);
+        verify(accountService, times(1)).getAccountsByClientId(testClientId, anyString());
     }
 
     @Test

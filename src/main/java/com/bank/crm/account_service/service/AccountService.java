@@ -96,12 +96,20 @@ public class AccountService {
      * Get all accounts for a specific client
      */
     @Transactional(readOnly = true)
-    public List<AccountResponse> getAccountsByClientId(UUID clientId) {
+    public List<AccountResponse> getAccountsByClientId(UUID clientId, String userId) {
         logger.info("Retrieving accounts for client ID: {}", clientId);
 
         List<Account> accounts = accountRepository.findByClientId(clientId);
 
         logger.info("Found {} accounts for client ID: {}", accounts.size(), clientId);
+
+        String remarks = String.format(
+                "Retrieved %d accounts for client %s by agent %s.",
+                accounts.size(),
+                clientId,
+                userId
+        );
+        loggingService.sendReadLog(userId, clientId.toString(), remarks);
 
         return accounts.stream()
                 .map(this::convertToResponse)
