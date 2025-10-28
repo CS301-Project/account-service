@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -171,61 +172,72 @@ public class AccountService {
         Account account = optionalAccount.get();
         String clientId = account.getClientId().toString();
 
+        List<String> attributeNames = new ArrayList<>();
+        List<String> beforeValues = new ArrayList<>();
+        List<String> afterValues = new ArrayList<>();
+
         // Update only the fields that are provided (not null) and log each change
         if (request.getAccType() != null && !request.getAccType().equals(account.getAccType())) {
             String beforeValue = account.getAccType().toString();
             String afterValue = request.getAccType().toString();
             account.setAccType(request.getAccType());
-            String remarks = String.format(
-                    "Account type changed from %s to %s.",
-                    beforeValue,
-                    afterValue
-            );
-            loggingService.sendUpdateLog(userId, clientId, "Account Type", beforeValue, afterValue, remarks);
+
+            attributeNames.add("Account Type");
+            beforeValues.add(beforeValue);
+            afterValues.add(afterValue);
         }
         if (request.getAccStatus() != null && !request.getAccStatus().equals(account.getAccStatus())) {
             String beforeValue = account.getAccStatus().toString();
             String afterValue = request.getAccStatus().toString();
             account.setAccStatus(request.getAccStatus());
-            String remarks = String.format(
-                    "Account status changed from %s to %s.",
-                    beforeValue,
-                    afterValue
-            );
-            loggingService.sendUpdateLog(userId, clientId, "Account Status", beforeValue, afterValue, remarks);
+
+            attributeNames.add("Account Status");
+            beforeValues.add(beforeValue);
+            afterValues.add(afterValue);
         }
         if (request.getInitialDeposit() != null && !request.getInitialDeposit().equals(account.getInitialDeposit())) {
             String beforeValue = account.getInitialDeposit().toString();
             String afterValue = request.getInitialDeposit().toString();
             account.setInitialDeposit(request.getInitialDeposit());
-            String remarks = String.format(
-                    "Initial deposit changed from %s to %s.",
-                    beforeValue,
-                    afterValue
-            );
-            loggingService.sendUpdateLog(userId, clientId, "Initial Deposit", beforeValue, afterValue, remarks);
+
+            attributeNames.add("Initial Deposit");
+            beforeValues.add(beforeValue);
+            afterValues.add(afterValue);
+
         }
         if (request.getCurrency() != null && !request.getCurrency().equals(account.getCurrency())) {
             String beforeValue = account.getCurrency();
             String afterValue = request.getCurrency();
             account.setCurrency(request.getCurrency());
-            String remarks = String.format(
-                    "Currency changed from %s to %s.",
-                    beforeValue,
-                    afterValue
-            );
-            loggingService.sendUpdateLog(userId, clientId, "Currency", beforeValue, afterValue, remarks);
+
+            attributeNames.add("Currency");
+            beforeValues.add(beforeValue);
+            afterValues.add(afterValue);
+
         }
         if (request.getBranchId() != null && !request.getBranchId().equals(account.getBranchId())) {
             String beforeValue = account.getBranchId().toString();
             String afterValue = request.getBranchId().toString();
             account.setBranchId(request.getBranchId());
-            String remarks = String.format(
-                    "Branch ID changed from %s to %s.",
-                    beforeValue,
-                    afterValue
+
+            attributeNames.add("Branch ID");
+            beforeValues.add(beforeValue);
+            afterValues.add(afterValue);
+        }
+
+        if (!attributeNames.isEmpty()) {
+            String consolidatedAttributes = String.join(" | ", attributeNames);
+            String consolidatedBeforeValues = String.join(" | ", beforeValues);
+            String consolidatedAfterValues = String.join(" | ", afterValues);
+            String consolidatedRemarks = String.format(
+                    "Updated attributes for account ID %s: %s",
+                    accountId,
+                    attributeNames
             );
-            loggingService.sendUpdateLog(userId, clientId, "Branch ID", beforeValue, afterValue, remarks);
+
+            loggingService.sendUpdateLog(userId, clientId, consolidatedAttributes,
+                    consolidatedBeforeValues, consolidatedAfterValues,
+                    consolidatedRemarks);
         }
 
         // Save the updated account
