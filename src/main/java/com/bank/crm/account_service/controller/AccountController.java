@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/accounts")
+@RequestMapping("/accounts")
 @CrossOrigin(origins = "*")
 public class AccountController {
 
@@ -28,7 +28,7 @@ public class AccountController {
     private AccountService accountService;
 
     /**
-     * Create Account - POST /api/accounts
+     * Create Account - POST /accounts
      */
     @PostMapping
     public ResponseEntity<AccountResponse> createAccount(
@@ -51,7 +51,7 @@ public class AccountController {
     }
 
     /**
-     * Delete Account - DELETE /api/accounts/{accountId}
+     * Delete Account - DELETE /accounts/{accountId}
      */
     @DeleteMapping("/{accountId}")
     public ResponseEntity<Void> deleteAccount(
@@ -74,7 +74,7 @@ public class AccountController {
     }
 
     /**
-     * Get Account by Client ID - GET /api/accounts/client/{clientId}
+     * Get Account by Client ID - GET /accounts/client/{clientId}
      */
     @GetMapping("/client/{clientId}")
     public ResponseEntity<List<AccountResponse>> getAccountsByClientId(@PathVariable UUID clientId, @RequestParam String userId) {
@@ -95,7 +95,7 @@ public class AccountController {
     }
 
     /**
-     * Get All Accounts - GET /api/accounts
+     * Get All Accounts - GET /accounts
      */
     @GetMapping
     public ResponseEntity<List<AccountResponse>> getAllAccounts() {
@@ -113,7 +113,7 @@ public class AccountController {
     }
 
     /**
-     * Get Account by ID - GET /api/accounts/{accountId}
+     * Get Account by ID - GET /accounts/{accountId}
      */
     @GetMapping("/{accountId}")
     public ResponseEntity<AccountResponse> getAccountById(
@@ -141,7 +141,7 @@ public class AccountController {
     }
 
     /**
-     * Update Account - PUT /api/accounts/{accountId}
+     * Update Account - PUT /accounts/{accountId}
      */
     @PutMapping("/{accountId}")
     public ResponseEntity<AccountResponse> updateAccount(
