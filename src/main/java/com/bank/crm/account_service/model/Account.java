@@ -2,8 +2,6 @@ package com.bank.crm.account_service.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,12 +27,12 @@ public class Account {
     private UUID clientId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "account_type", nullable = false, columnDefinition = "account_type")
+    @Column(name = "account_type", nullable = false)
     @NotNull(message = "Account type is required")
     private AccountType accType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "account_status", nullable = false, columnDefinition = "account_status")
+    @Column(name = "account_status", nullable = false)
     @NotNull(message = "Account status is required")
     private AccountStatus accStatus;
 
