@@ -29,13 +29,11 @@ public class Account {
     private UUID clientId;
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "account_type", nullable = false, columnDefinition = "account_type")
     @NotNull(message = "Account type is required")
     private AccountType accType;
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "account_status", nullable = false, columnDefinition = "account_status")
     @NotNull(message = "Account status is required")
     private AccountStatus accStatus;
