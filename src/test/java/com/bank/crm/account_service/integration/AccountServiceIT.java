@@ -49,7 +49,7 @@ class AccountServiceIT {
     void shouldCreateAccountSuccessfully() throws Exception {
         CreateAccountRequest newAccount = validCreateAccountRequest();
 
-        mvc.perform(post("/api/accounts")
+        mvc.perform(post("/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newAccount)))
                 .andDo(print())
@@ -70,7 +70,7 @@ class AccountServiceIT {
         CreateAccountRequest newAccount = validCreateAccountRequest();
         newAccount.setClientId(null);
 
-        mvc.perform(post("/api/accounts")
+        mvc.perform(post("/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newAccount)))
                 .andDo(print())
@@ -83,7 +83,7 @@ class AccountServiceIT {
         CreateAccountRequest newAccount = validCreateAccountRequest();
         newAccount.setAccType(null);
 
-        mvc.perform(post("/api/accounts")
+        mvc.perform(post("/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newAccount)))
                 .andDo(print())
@@ -96,7 +96,7 @@ class AccountServiceIT {
         CreateAccountRequest newAccount = validCreateAccountRequest();
         newAccount.setInitialDeposit(new BigDecimal("-100.00"));
 
-        mvc.perform(post("/api/accounts")
+        mvc.perform(post("/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newAccount)))
                 .andDo(print())
@@ -109,7 +109,7 @@ class AccountServiceIT {
         CreateAccountRequest newAccount = validCreateAccountRequest();
         newAccount.setCurrency("US"); // Too short
 
-        mvc.perform(post("/api/accounts")
+        mvc.perform(post("/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newAccount)))
                 .andDo(print())
@@ -122,7 +122,7 @@ class AccountServiceIT {
         CreateAccountRequest newAccount = validCreateAccountRequest();
         newAccount.setBranchId(-1);
 
-        mvc.perform(post("/api/accounts")
+        mvc.perform(post("/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newAccount)))
                 .andDo(print())
@@ -137,7 +137,7 @@ class AccountServiceIT {
         Account existingAccount = validAccount();
         accountRepository.saveAndFlush(existingAccount);
 
-        mvc.perform(get("/api/accounts/" + existingAccount.getId()))
+        mvc.perform(get("/accounts/" + existingAccount.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(existingAccount.getId().toString())))
                 .andExpect(jsonPath("$.clientId", is(existingAccount.getClientId().toString())))
@@ -149,7 +149,7 @@ class AccountServiceIT {
     void shouldReturnNotFoundWhenAccountDoesNotExist() throws Exception {
         UUID nonExistentId = UUID.randomUUID();
 
-        mvc.perform(get("/api/accounts/" + nonExistentId))
+        mvc.perform(get("/accounts/" + nonExistentId))
                 .andExpect(status().isNotFound());
     }
 
@@ -161,7 +161,7 @@ class AccountServiceIT {
         accountRepository.saveAndFlush(account1);
         accountRepository.saveAndFlush(account2);
 
-        mvc.perform(get("/api/accounts/client/" + clientId))
+        mvc.perform(get("/accounts/client/" + clientId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].clientId", is(clientId.toString())))
@@ -172,7 +172,7 @@ class AccountServiceIT {
     void shouldReturnEmptyListWhenNoAccountsForClient() throws Exception {
         UUID clientId = UUID.randomUUID();
 
-        mvc.perform(get("/api/accounts/client/" + clientId))
+        mvc.perform(get("/accounts/client/" + clientId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
     }
@@ -184,7 +184,7 @@ class AccountServiceIT {
         accountRepository.saveAndFlush(account1);
         accountRepository.saveAndFlush(account2);
 
-        mvc.perform(get("/api/accounts"))
+        mvc.perform(get("/accounts"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
     }
@@ -198,7 +198,7 @@ class AccountServiceIT {
 
         UpdateAccountRequest updateRequest = validUpdateAccountRequest();
 
-        mvc.perform(put("/api/accounts/" + existingAccount.getId())
+        mvc.perform(put("/accounts/" + existingAccount.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andDo(print())
@@ -226,7 +226,7 @@ class AccountServiceIT {
         UpdateAccountRequest updateRequest = new UpdateAccountRequest();
         updateRequest.setAccType(AccountType.CHECKING); // Only update this field
 
-        mvc.perform(put("/api/accounts/" + existingAccount.getId())
+        mvc.perform(put("/accounts/" + existingAccount.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
@@ -240,7 +240,7 @@ class AccountServiceIT {
         UUID nonExistentId = UUID.randomUUID();
         UpdateAccountRequest updateRequest = validUpdateAccountRequest();
 
-        mvc.perform(put("/api/accounts/" + nonExistentId)
+        mvc.perform(put("/accounts/" + nonExistentId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isNotFound());
@@ -254,7 +254,7 @@ class AccountServiceIT {
         UpdateAccountRequest updateRequest = validUpdateAccountRequest();
         updateRequest.setInitialDeposit(new BigDecimal("-50.00"));
 
-        mvc.perform(put("/api/accounts/" + existingAccount.getId())
+        mvc.perform(put("/accounts/" + existingAccount.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isBadRequest())
@@ -268,7 +268,7 @@ class AccountServiceIT {
         Account existingAccount = validAccount();
         accountRepository.saveAndFlush(existingAccount);
 
-        mvc.perform(delete("/api/accounts/" + existingAccount.getId()))
+        mvc.perform(delete("/accounts/" + existingAccount.getId()))
                 .andExpect(status().isNoContent());
 
         assertFalse(accountRepository.existsById(existingAccount.getId()));
@@ -278,7 +278,7 @@ class AccountServiceIT {
     void shouldFailDeleteWhenAccountNotFound() throws Exception {
         UUID nonExistentId = UUID.randomUUID();
 
-        mvc.perform(delete("/api/accounts/" + nonExistentId))
+        mvc.perform(delete("/accounts/" + nonExistentId))
                 .andExpect(status().isNotFound());
     }
 
@@ -286,7 +286,7 @@ class AccountServiceIT {
 
     @Test
     void shouldFailWhenInvalidUUIDInPath() throws Exception {
-        mvc.perform(get("/api/accounts/invalid-uuid"))
+        mvc.perform(get("/accounts/invalid-uuid"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -301,18 +301,18 @@ class AccountServiceIT {
         CreateAccountRequest request2 = createAccountRequestWithClientId(clientId);
         request2.setAccType(AccountType.CHECKING);
 
-        mvc.perform(post("/api/accounts")
+        mvc.perform(post("/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request1)))
                 .andExpect(status().isCreated());
 
-        mvc.perform(post("/api/accounts")
+        mvc.perform(post("/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request2)))
                 .andExpect(status().isCreated());
 
         // Verify both accounts exist for the client
-        mvc.perform(get("/api/accounts/client/" + clientId))
+        mvc.perform(get("/accounts/client/" + clientId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
     }
